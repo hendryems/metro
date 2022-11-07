@@ -191,7 +191,7 @@ class ModuleResolver<TModule: Moduleish, TPackage: Packageish> {
         moduleName,
         platform,
       );
-      return this._getFileResolvedModule(result);
+      return this._getFileResolvedModule(result, moduleName, fromModule.path);
     } catch (error) {
       if (error instanceof Resolver.FailedToResolvePathError) {
         const {candidates} = error;
@@ -247,8 +247,8 @@ class ModuleResolver<TModule: Moduleish, TPackage: Packageish> {
    * FIXME: get rid of this function and of the reliance on `TModule`
    * altogether, return strongly typed resolutions at the top-level instead.
    */
-  _getFileResolvedModule(resolution: Resolution): TModule {
-    switch (resolution.type) {
+  _getFileResolvedModule(resolution: Resolution, moduleName: string, fromModulePath: string): TModule {
+    switch (resolution?.type) {
       case 'sourceFile':
         return this._options.moduleCache.getModule(resolution.filePath);
       case 'assetFiles':
@@ -261,8 +261,7 @@ class ModuleResolver<TModule: Moduleish, TPackage: Packageish> {
         // $FlowFixMe[incompatible-return]
         return this._getEmptyModule();
       default:
-        (resolution.type: empty);
-        throw new Error('invalid type');
+        throw new Error(`invalid type - resolution of ${moduleName} from ${fromModulePath} has failed`);
     }
   }
 
